@@ -10,7 +10,7 @@ from core.activations import sigmoid, softmax
 
 
 def mae(y: np.ndarray, o: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """
+    """Computes the mean absolute error between true and pred arrays.
 
     Parameters
     ----------
@@ -21,7 +21,7 @@ def mae(y: np.ndarray, o: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 
     Returns
     -------
-    np.ndarray, np.ndarray : cost @ (1, 1), grad @ (m, 1)
+    np.ndarray, np.ndarray : loss @ (), grad @ (m, 1)
 
     """
 
@@ -29,17 +29,17 @@ def mae(y: np.ndarray, o: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 
     m, _ = y.shape
 
-    cost = np.sum(np.abs(y - o)) / m
+    loss = np.mean(np.abs(y - o))
     grad = ...
 
-    assert cost.shape == (1, 1)
+    assert loss.shape == ()
     assert grad.shape == (m, 1)
 
-    return cost, grad
+    return loss, grad
 
 
 def mse(y: np.ndarray, o: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """
+    """Computes the mean squared error between true and pred arrays.
 
     Parameters
     ----------
@@ -50,7 +50,7 @@ def mse(y: np.ndarray, o: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 
     Returns
     -------
-    np.ndarray, np.ndarray : cost @ (1, 1), grad @ (m, 1)
+    np.ndarray, np.ndarray : loss @ (), grad @ (m, 1)
 
     """
 
@@ -58,32 +58,32 @@ def mse(y: np.ndarray, o: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 
     m, _ = y.shape
 
-    cost = np.sum((y - o) ** 2) / m
-    grad = ...
+    loss = np.mean((y - o) ** 2) / 2
+    grad = o - y
 
-    assert cost.shape == (1, 1)
+    assert loss.shape == ()
     assert grad.shape == (m, 1)
 
-    return cost, grad
+    return loss, grad
 
 
 def binary_crossentropy(
     y: np.ndarray, o: np.ndarray, logits: bool = True
 ) -> tuple[np.ndarray, np.ndarray]:
-    """
+    """Computes the binary crossentropy between true and pred arrays.
 
     Parameters
     ----------
-    y : np.ndarray
+    y : np.ndarray @ (m, 1)
         The target ground truth labels.
-    o : np.ndarray
+    o : np.ndarray @ (m, 1)
         The network output predictions.
     logits : bool = True
         Indicates whether the values of o are activated.
 
     Returns
     -------
-    np.ndarray, np.ndarray : cost, grad
+    np.ndarray, np.ndarray : loss @ (), grad @ (m, 1)
 
     """
 
@@ -93,35 +93,36 @@ def binary_crossentropy(
 
     if logits == True:
         a = sigmoid(o)
-        cost = y * np.log(a) + (1 - y) * np.log(1 - a)
-        grad = ...
+        loss = np.mean(-y * np.log(a) - (1 - y) * np.log(1 - a))
+        grad = a - y
     else:
-        cost = ...
-        grad = ...
+        loss = np.mean(-y * np.log(o) - (1 - y) * np.log(1 - o))
+        # grad = o - y
+        grad = (o - y) / (o * (1 - o))
 
-    assert cost.shape == (1, 1)
+    assert loss.shape == ()
     assert grad.shape == (m, 1)
 
-    return cost, grad
+    return loss, grad
 
 
 def categorical_crossentropy(
     y: np.ndarray, o: np.ndarray, logits: bool = True
 ) -> tuple[np.ndarray, np.ndarray]:
-    """
+    """Computes the categorical crossentropy between true and pred arrays.
 
     Parameters
     ----------
-    y : np.ndarray
+    y : np.ndarray @ (m, n_out)
         The target ground truth labels.
-    o : np.ndarray
+    o : np.ndarray @ (m, n_out)
         The network output predictions.
     logits : bool = True
         Indicates whether the values of o are activated.
 
     Returns
     -------
-    np.ndarray, np.ndarray : cost, grad
+    np.ndarray, np.ndarray : loss @ (), grad @ (m, n_out)
 
 
     """
@@ -132,13 +133,13 @@ def categorical_crossentropy(
 
     if logits == True:
         a = sigmoid(o)
-        cost = y * np.log(a) + (1 - y) * np.log(1 - a)
+        loss = y * np.log(a) + (1 - y) * np.log(1 - a)
         grad = ...
     else:
-        cost = ...
+        loss = ...
         grad = ...
 
-    assert cost.shape == (1, 1)
+    assert loss.shape == ()
     assert grad.shape == (m, 1)
 
-    return cost, grad
+    return loss, grad
