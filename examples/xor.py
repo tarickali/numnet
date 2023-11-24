@@ -1,7 +1,7 @@
 """
 title : xor.py
 create : @tarickali 23/11/20
-update : @tarickali 23/11/22
+update : @tarickali 23/11/24
 """
 
 import numpy as np
@@ -73,12 +73,12 @@ def xor_driver():
     x, y = generate_data()
 
     architecture = [
-        {"input_dim": 2, "output_dim": 4, "activation": "sigmoid"},
-        {"input_dim": 4, "output_dim": 4, "activation": "sigmoid"},
-        {"input_dim": 4, "output_dim": 1, "activation": "linear"},
+        {"input_dim": 2, "output_dim": 4, "weight_init": 1.0, "activation": "sigmoid"},
+        {"input_dim": 4, "output_dim": 4, "weight_init": 1.0, "activation": "sigmoid"},
+        {"input_dim": 4, "output_dim": 1, "weight_init": 1.0, "activation": "linear"},
     ]
 
-    network = initialize(architecture, weight_init=1.0, seed=0)
+    network = initialize(architecture, seed=0)
 
     history = train(network, x, y, alpha=0.5, epochs=1000)
 

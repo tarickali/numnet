@@ -1,7 +1,7 @@
 """
 title : engine.py
 create : @tarickali 23/11/19
-update : @tarickali 23/11/22
+update : @tarickali 23/11/24
 """
 
 import copy
@@ -11,9 +11,7 @@ from core.types import Architecture, Network, Cache, Gradients
 from core.activations import FUNCTIONS, GRADIENTS
 
 
-def initialize(
-    architecture: Architecture, weight_init: float = 1.0, seed: int = None
-) -> Network:
+def initialize(architecture: Architecture, seed: int = None) -> Network:
     """Initialize the parameters of a feedforward neural network.
 
     Parameters
@@ -36,6 +34,7 @@ def initialize(
     for layer in architecture:
         input_dim = layer["input_dim"]
         output_dim = layer["output_dim"]
+        weight_init = layer.get("weight_init", 1.0)
         activation = layer["activation"]
         network.append(
             {

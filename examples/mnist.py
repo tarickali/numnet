@@ -1,7 +1,7 @@
 """
 title : mnist.py
 create : @tarickali 23/11/22
-update : @tarickali 23/11/22
+update : @tarickali 23/11/24
 """
 
 import time
@@ -117,18 +117,38 @@ def mnist_driver():
     X, y = X[: int(0.8 * n)], y[: int(0.8 * n)]
 
     architecture = [
-        {"input_dim": 784, "output_dim": 512, "activation": "relu"},
-        {"input_dim": 512, "output_dim": 512, "activation": "relu"},
-        {"input_dim": 512, "output_dim": 512, "activation": "relu"},
-        {"input_dim": 512, "output_dim": 10, "activation": "linear"},
+        {
+            "input_dim": 784,
+            "output_dim": 512,
+            "weight_init": 0.01,
+            "activation": "relu",
+        },
+        {
+            "input_dim": 512,
+            "output_dim": 512,
+            "weight_init": 0.01,
+            "activation": "relu",
+        },
+        {
+            "input_dim": 512,
+            "output_dim": 512,
+            "weight_init": 0.01,
+            "activation": "relu",
+        },
+        {
+            "input_dim": 512,
+            "output_dim": 10,
+            "weight_init": 0.01,
+            "activation": "linear",
+        },
     ]
 
-    network = initialize(architecture, weight_init=0.01, seed=0)
+    network = initialize(architecture, seed=0)
 
     start = time.time()
     history = train(network, X, y, alpha=0.01, epochs=5)
     end = time.time()
-    print(end - start)
+    print(f"Train time: {end - start}")
 
     losses = [epoch["loss"] for epoch in history]
     plt.plot(losses)
