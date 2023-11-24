@@ -1,7 +1,7 @@
 """
 title : losses.py
 create : @tarickali 23/11/19
-update : @tarickali 23/11/19
+update : @tarickali 23/11/22
 """
 
 import numpy as np
@@ -129,17 +129,17 @@ def categorical_crossentropy(
 
     assert y.shape == o.shape
 
-    m, _ = y.shape
+    m, k = y.shape
 
     if logits == True:
-        a = sigmoid(o)
-        loss = y * np.log(a) + (1 - y) * np.log(1 - a)
-        grad = ...
+        a = softmax(o)
+        loss = -np.mean(y * np.log(a))
+        grad = a - y
     else:
-        loss = ...
-        grad = ...
+        loss = -np.mean(y * np.log(o))
+        grad = o - y
 
     assert loss.shape == ()
-    assert grad.shape == (m, 1)
+    assert grad.shape == (m, k)
 
     return loss, grad
