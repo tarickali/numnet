@@ -1,18 +1,19 @@
 """
 title : engine.py
 create : @tarickali 23/11/19
-update : @tarickali 23/11/19
+update : @tarickali 23/11/22
 """
 
+import copy
 import numpy as np
 
-from core.types import Architecture, Network, Cache, Gradients, History
-from core.activations import FUNCTIONS, GRADIENTS, sigmoid
-from core.losses import binary_crossentropy
-from core.metrics import accuracy
+from core.types import Architecture, Network, Cache, Gradients
+from core.activations import FUNCTIONS, GRADIENTS
 
 
-def initialize(architecture: Architecture, seed: int = None) -> Network:
+def initialize(
+    architecture: Architecture, weight_init: float = 1.0, seed: int = None
+) -> Network:
     """Initialize the parameters of a feedforward neural network.
 
     Parameters
@@ -38,7 +39,7 @@ def initialize(architecture: Architecture, seed: int = None) -> Network:
         activation = layer["activation"]
         network.append(
             {
-                "W": rng.normal(loc=0.0, scale=1.0, size=(input_dim, output_dim)),
+                "W": rng.randn(input_dim, output_dim) * weight_init,
                 "b": np.zeros(shape=(output_dim,)),
                 "activation": activation,
             }
@@ -106,7 +107,9 @@ def backward(network: Network, grad: np.ndarray, cache: Cache) -> Gradients:
     return list(reversed(gradients))
 
 
-def update(network: Network, gradients: Gradients, alpha: float) -> None:
+def update(
+    network: Network, gradients: Gradients, alpha: float, inplace: bool = False
+) -> Network | None:
     """Update the parameters of network with gradients.
 
     Parameters
@@ -117,35 +120,22 @@ def update(network: Network, gradients: Gradients, alpha: float) -> None:
         The gradients of the network parameters.
     alpha : float
         The learning rate to update the network parameters.
+    inplace : bool = False
+        Indicates whether to update the network inplace or update a deepcopy.
+
+    Returns
+    -------
+    Network | None
+        Copy of the network with updated parameters or None if inplace is True.
 
     """
 
-    for layer, grad in zip(network, gradients):
+    clone = network
+    if not inplace:
+        clone = copy.deepcopy(network)
+
+    for layer, grad in zip(clone, gradients):
         layer["W"] -= alpha * grad["W"]
         layer["b"] -= alpha * grad["b"]
 
-
-def train(
-    network: Network,
-    X: np.ndarray,
-    y: np.ndarray,
-    m: int = None,
-    alpha: float = 0.001,
-    epochs: int = 100,
-) -> History:
-    """ """
-
-    n = len(X)
-
-    history = []
-    for e in range(epochs):
-        o, cache = forward(network, X)
-        loss, grad = binary_crossentropy(y, o)
-        gradients = backward(network, grad, cache)
-        update(network, gradients, alpha)
-
-        acc = accuracy(y, np.round(sigmoid(o)))
-        history.append({"epoch": e, "loss": loss, "acc": acc})
-        print(history[-1])
-
-    return history
+    return clone

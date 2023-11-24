@@ -1,7 +1,7 @@
 """
 title : xor.py
 create : @tarickali 23/11/20
-update : @tarickali 23/11/20
+update : @tarickali 23/11/22
 """
 
 import numpy as np
@@ -59,7 +59,7 @@ def train(
         o, cache = forward(network, X)
         loss, grad = binary_crossentropy(y, o)
         gradients = backward(network, grad, cache)
-        update(network, gradients, alpha)
+        network = update(network, gradients, alpha)
 
         p = np.round(sigmoid(o))
         acc = accuracy(y, p)
@@ -78,9 +78,9 @@ def xor_driver():
         {"input_dim": 4, "output_dim": 1, "activation": "linear"},
     ]
 
-    network = initialize(architecture, 0)
+    network = initialize(architecture, weight_init=1.0, seed=0)
 
-    history = train(network, x, y, alpha=0.1, epochs=300)
+    history = train(network, x, y, alpha=0.5, epochs=1000)
 
     losses = [epoch["loss"] for epoch in history]
     plt.plot(losses)
