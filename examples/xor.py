@@ -1,7 +1,7 @@
 """
 title : xor.py
 create : @tarickali 23/11/20
-update : @tarickali 23/11/24
+update : @tarickali 23/11/28
 """
 
 import numpy as np
@@ -70,18 +70,25 @@ def train(
 
 
 def xor_driver():
+    # Generate XOR data
     x, y = generate_data()
 
+    # Network and training hyperparameters
+    EPOCHS = 200
+    ALPHA = 0.5
     architecture = [
         {"input_dim": 2, "output_dim": 4, "weight_init": 1.0, "activation": "sigmoid"},
         {"input_dim": 4, "output_dim": 4, "weight_init": 1.0, "activation": "sigmoid"},
         {"input_dim": 4, "output_dim": 1, "weight_init": 1.0, "activation": "linear"},
     ]
 
+    # Initialize network
     network = initialize(architecture, seed=0)
 
-    history = train(network, x, y, alpha=0.5, epochs=1000)
+    # Train network
+    history = train(network, x, y, alpha=ALPHA, epochs=EPOCHS)
 
+    # Plot loss curve
     losses = [epoch["loss"] for epoch in history]
     plt.plot(losses)
     plt.show()

@@ -1,13 +1,14 @@
 """
 title : mnist.py
 create : @tarickali 23/11/22
-update : @tarickali 23/11/24
+update : @tarickali 23/11/28
 """
 
 import time
 
 import numpy as np
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
 import matplotlib.pyplot as plt
 
@@ -29,19 +30,36 @@ def generate_data() -> tuple[np.ndarray, np.ndarray]:
 
     """
 
+    # Read in MNIST training dataframe
     train_df = pd.read_csv("data/mnist/train.csv")
 
+    # Get pixel and label information from dataframe
     pixels = train_df.drop("label", axis=1).to_numpy()
     labels = train_df["label"].to_numpy()
 
+    # Scale pixel data to be between 0.0 - 1.0
     X = pixels.reshape((-1, 784)) / 255.0
+
+    # Create one hot vector of labels
     y = one_hot(labels)
 
     return X, y
 
 
 def one_hot(x: np.ndarray, k: int = 10) -> np.ndarray:
-    """ """
+    """Create a one-hot array of input array with k classes.
+
+    Parameters
+    ----------
+    x : np.ndarray @ (n, 1)
+    k : int = 10
+        Number of classes in the one-hot array.
+
+    Returns
+    -------
+    np.ndarray @ (n, k)
+
+    """
 
     n = x.shape[0]
     o = np.zeros((n, k))
@@ -50,17 +68,34 @@ def one_hot(x: np.ndarray, k: int = 10) -> np.ndarray:
 
 
 def get_batches(
-    X: np.ndarray, y: np.ndarray, m: int
+    X: np.ndarray, y: np.ndarray, m: int = 32
 ) -> list[tuple[np.ndarray, np.ndarray]]:
-    """ """
+    """Create batches of (X, y) data.
+
+    Parameters
+    ----------
+    X : np.ndarray
+    y : np.ndarray
+    m : int = 32
+
+    Returns
+    -------
+    list[tuple[np.ndarray, np.ndarray]]
+
+    """
 
     n = X.shape[0]
     batches = []
+
+    # Loop for creating batches of size m
     for i in range(n // m):
         a, b = i * m, (i + 1) * m
         batches.append((X[a:b], y[a:b]))
+
+    # Create an extra match of size < m for leftover data
     if b != n:
         batches.append((X[b:], y[b:]))
+
     return batches
 
 
@@ -72,13 +107,13 @@ def train(
     m: int = 32,
     epochs: int = 300,
 ) -> History:
-    """Training function used for the XOR problem.
+    """Training function used for the MNIST problem.
 
     Parameters
     ----------
     network : Network
-    X : np.ndarray @ (4, 2)
-    y : np.ndarray @ (4, 1)
+    X : np.ndarray @ (n, 784)
+    y : np.ndarray @ (n, 1)
     alpha : float = 0.1
     epochs : int = 300
 
@@ -112,10 +147,17 @@ def train(
 
 
 def mnist_driver():
+    # Get MNIST data
     X, y = generate_data()
-    n = X.shape[0]
-    X, y = X[: int(0.8 * n)], y[: int(0.8 * n)]
 
+    # Split data into train and test sets
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+
+    # Network and training hyperparameters
+    EPOCHS = 5
+    ALPHA = 0.01
     architecture = [
         {
             "input_dim": 784,
@@ -143,13 +185,31 @@ def mnist_driver():
         },
     ]
 
+    # Initialize network
     network = initialize(architecture, seed=0)
 
+    # Train network
     start = time.time()
-    history = train(network, X, y, alpha=0.01, epochs=5)
+    history = train(network, X_train, y_train, alpha=ALPHA, epochs=EPOCHS)
     end = time.time()
-    print(f"Train time: {end - start}")
+    print(f"Training time: {end - start}")
 
+    # Plot loss and accuracy curves
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(10, 7))
     losses = [epoch["loss"] for epoch in history]
-    plt.plot(losses)
+    accs = [epoch["acc"] for epoch in history]
+    axes[0].plot(losses)
+    axes[0].set(title="Loss Curve", xlabel="Epochs", ylabel="Loss")
+    axes[1].plot(accs)
+    axes[1].set(title="Accuracy Curve", xlabel="Epochs", ylabel="Accuracy")
     plt.show()
+
+    # Compute trained network's accuracy on training data
+    y_train_pred, _ = forward(network, X_train)
+    train_acc = accuracy(y_train, y_train_pred)
+    print(f"Train accuracy: {train_acc}")
+
+    # Compute trained network's accuracy on test data
+    y_test_pred, _ = forward(network, X_test)
+    test_acc = accuracy(y_test, y_test_pred)
+    print(f"Test accuracy: {test_acc}")
