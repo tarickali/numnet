@@ -1,41 +1,12 @@
 """
 title : losses.py
 create : @tarickali 23/11/19
-update : @tarickali 23/11/22
+update : @tarickali 23/11/28
 """
 
 import numpy as np
 
 from core.activations import sigmoid, softmax
-
-
-def mae(y: np.ndarray, o: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """Computes the mean absolute error between true and pred arrays.
-
-    Parameters
-    ----------
-    y : np.ndarray @ (m, 1)
-        The target ground truth labels.
-    o : np.ndarray @ (m, 1)
-        The network output predictions.
-
-    Returns
-    -------
-    np.ndarray, np.ndarray : loss @ (), grad @ (m, 1)
-
-    """
-
-    assert y.shape == o.shape
-
-    m, _ = y.shape
-
-    loss = np.mean(np.abs(y - o))
-    grad = ...
-
-    assert loss.shape == ()
-    assert grad.shape == (m, 1)
-
-    return loss, grad
 
 
 def mse(y: np.ndarray, o: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -97,7 +68,6 @@ def binary_crossentropy(
         grad = a - y
     else:
         loss = np.mean(-y * np.log(o) - (1 - y) * np.log(1 - o))
-        # grad = o - y
         grad = (o - y) / (o * (1 - o))
 
     assert loss.shape == ()

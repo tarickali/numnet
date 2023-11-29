@@ -1,7 +1,7 @@
 """
 title : engine.py
 create : @tarickali 23/11/19
-update : @tarickali 23/11/24
+update : @tarickali 23/11/28
 """
 
 import copy
@@ -70,8 +70,8 @@ def forward(network: Network, x: np.ndarray) -> tuple[np.ndarray, Cache]:
     cache = []
     for layer in network:
         W, b, activation = layer["W"], layer["b"], layer["activation"]
-        cache.append({"z": z, "a": a})
         z = a @ W + b
+        cache.append({"z": z, "a": a})
         a = FUNCTIONS[activation](z)
     return a, cache
 
@@ -101,8 +101,9 @@ def backward(network: Network, grad: np.ndarray, cache: Cache) -> Gradients:
         W, activation = layer["W"], layer["activation"]
         z, a = memory["z"], memory["a"]
         m, _ = a.shape
-        gradients.append({"W": a.T @ delta / m, "b": np.mean(delta, axis=0)})
-        delta = delta @ W.T * GRADIENTS[activation](z)
+        dZ = delta * GRADIENTS[activation](z)
+        gradients.append({"W": a.T @ dZ / m, "b": np.mean(delta, axis=0)})
+        delta = dZ @ W.T
     return list(reversed(gradients))
 
 
