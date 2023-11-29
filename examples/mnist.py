@@ -202,14 +202,17 @@ def mnist_driver():
     axes[0].set(title="Loss Curve", xlabel="Epochs", ylabel="Loss")
     axes[1].plot(accs)
     axes[1].set(title="Accuracy Curve", xlabel="Epochs", ylabel="Accuracy")
+    plt.tight_layout()
     plt.show()
 
     # Compute trained network's accuracy on training data
     y_train_pred, _ = forward(network, X_train)
+    y_train_pred = one_hot(np.argmax(softmax(y_train_pred), axis=1), k=10)
     train_acc = accuracy(y_train, y_train_pred)
     print(f"Train accuracy: {train_acc}")
 
     # Compute trained network's accuracy on test data
     y_test_pred, _ = forward(network, X_test)
+    y_test_pred = one_hot(np.argmax(softmax(y_test_pred), axis=1), k=10)
     test_acc = accuracy(y_test, y_test_pred)
     print(f"Test accuracy: {test_acc}")
